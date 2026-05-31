@@ -1,0 +1,56 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.NIUNANtime" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.NIUNANtime" parent="Base.Theme.NIUNANtime" />
+
+    <!-- 主题颜色变体 -->
+    <style name="Theme.NIUNANtime.Purple" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_purple</item>
+    </style>
+    <style name="Theme.NIUNANtime.Blue" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_blue</item>
+    </style>
+    <style name="Theme.NIUNANtime.Green" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_green</item>
+    </style>
+    <style name="Theme.NIUNANtime.Red" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_red</item>
+    </style>
+    <style name="Theme.NIUNANtime.Orange" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_orange</item>
+    </style>
+    <style name="Theme.NIUNANtime.Teal" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_teal</item>
+    </style>
+    <style name="Theme.NIUNANtime.Pink" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_pink</item>
+    </style>
+    <style name="Theme.NIUNANtime.Indigo" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_indigo</item>
+    </style>
+    <style name="Theme.NIUNANtime.Cyan" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_cyan</item>
+    </style>
+    <style name="Theme.NIUNANtime.Lime" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_lime</item>
+    </style>
+    <style name="Theme.NIUNANtime.DeepOrange" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_deep_orange</item>
+    </style>
+    <style name="Theme.NIUNANtime.DeepPurple" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_deep_purple</item>
+    </style>
+    <style name="Theme.NIUNANtime.Brown" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_brown</item>
+    </style>
+    <style name="Theme.NIUNANtime.BlueGrey" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_blue_grey</item>
+    </style>
+    <style name="Theme.NIUNANtime.LightGreen" parent="Theme.NIUNANtime">
+        <item name="colorPrimary">@color/theme_light_green</item>
+    </style>
+</resources>

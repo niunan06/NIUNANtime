@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- 主题颜色选项（15色） -->
+    <color name="theme_purple">#6750A4</color>
+    <color name="theme_blue">#1976D2</color>
+    <color name="theme_green">#388E3C</color>
+    <color name="theme_red">#D32F2F</color>
+    <color name="theme_orange">#F57C00</color>
+    <color name="theme_teal">#00796B</color>
+    <color name="theme_pink">#C2185B</color>
+    <color name="theme_indigo">#3F51B5</color>
+    <color name="theme_cyan">#00838F</color>
+    <color name="theme_lime">#689F38</color>
+    <color name="theme_deep_orange">#E64A19</color>
+    <color name="theme_deep_purple">#4527A0</color>
+    <color name="theme_brown">#5D4037</color>
+    <color name="theme_blue_grey">#455A64</color>
+    <color name="theme_light_green">#558B2F</color>
+</resources>
