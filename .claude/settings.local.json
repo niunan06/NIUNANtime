@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"D:\\\\android\\\\SDK\\\\platform-tools\\\\adb.exe\" wait-for-device *)",
+      "Bash(\"D:\\\\android\\\\SDK\\\\platform-tools\\\\adb.exe\" logcat *)",
+      "WebSearch"
+    ]
+  }
+}
