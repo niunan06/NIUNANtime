@@ -26,7 +26,7 @@ jobs:
       - name: Decode keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
-        run: echo "$KEYSTORE_BASE64" | base64 -d > app/release.keystore
+        run: python3 -c "import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.argv[1]))" "$KEYSTORE_BASE64" > app/release.keystore
 
       - name: Build Release APK
         env:
