@@ -210,6 +210,8 @@ public class StatisticsActivity extends AppCompatActivity {
             case "brown": setTheme(R.style.Theme_NIUNANtime_Brown); break;
             case "blue_grey": setTheme(R.style.Theme_NIUNANtime_BlueGrey); break;
             case "light_green": setTheme(R.style.Theme_NIUNANtime_LightGreen); break;
+            case "white": setTheme(R.style.Theme_NIUNANtime_White); break;
+            case "black": setTheme(R.style.Theme_NIUNANtime_Black); break;
         }
     }
 

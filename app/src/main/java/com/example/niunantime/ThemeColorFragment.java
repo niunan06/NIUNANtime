@@ -27,7 +27,8 @@ public class ThemeColorFragment extends Fragment {
     private final String[] colorKeys = {
             "purple", "blue", "green", "red", "orange",
             "teal", "pink", "indigo", "cyan", "lime",
-            "deep_orange", "deep_purple", "brown", "blue_grey", "light_green"
+            "deep_orange", "deep_purple", "brown", "blue_grey", "light_green",
+            "white", "black"
     };
 
     private final int[] colorValues = {
@@ -38,13 +39,15 @@ public class ThemeColorFragment extends Fragment {
             R.color.theme_cyan, R.color.theme_lime,
             R.color.theme_deep_orange, R.color.theme_deep_purple,
             R.color.theme_brown, R.color.theme_blue_grey,
-            R.color.theme_light_green
+            R.color.theme_light_green,R.color.white,
+            R.color.black
     };
 
     private final String[] colorLabels = {
             "紫色", "蓝色", "绿色", "红色", "橙色",
             "青色", "粉色", "靛蓝", "蓝绿", "黄绿",
-            "深橙", "深紫", "棕色", "蓝灰", "浅绿"
+            "深橙", "深紫", "棕色", "蓝灰", "浅绿",
+            "纯白", "纯黑"
     };
 
     private String selectedKey;

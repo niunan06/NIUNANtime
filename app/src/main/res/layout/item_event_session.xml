@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:text="5分00秒"
         android:textSize="15sp"
-        android:textColor="#6A4FB3"
+        android:textColor="?attr/colorPrimary"
         android:textStyle="bold" />
 
     <TextView

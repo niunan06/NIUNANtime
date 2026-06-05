@@ -1,9 +1,44 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
 }
 
+// 加载本地签名配置
+fun loadSigningProps(): Properties? {
+    val propsFile = rootProject.file("app/keystore.properties")
+    if (!propsFile.exists()) return null
+    val props = Properties()
+    FileInputStream(propsFile).use { props.load(it) }
+    return props
+}
+
+val localProps = loadSigningProps()
+
+val keystoreFile = System.getenv("RELEASE_KEYSTORE_PATH")?.let { file(it) }
+    ?: localProps?.let { file(it.getProperty("storeFile")) }
+
+val keystorePassword = System.getenv("RELEASE_STORE_PASSWORD")
+    ?: localProps?.getProperty("storePassword")
+
+val keyAliasName = System.getenv("RELEASE_KEY_ALIAS")
+    ?: localProps?.getProperty("keyAlias")
+
+val keyPasswordStr = System.getenv("RELEASE_KEY_PASSWORD")
+    ?: localProps?.getProperty("keyPassword")
+
 android {
     namespace = "com.example.niunantime"
+
+    signingConfigs {
+        create("release") {
+            storeFile = keystoreFile
+            storePassword = keystorePassword
+            keyAlias = keyAliasName
+            keyPassword = keyPasswordStr
+        }
+    }
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -27,6 +62,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

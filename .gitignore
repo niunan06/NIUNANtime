@@ -27,6 +27,9 @@ render.experimental.xml
 *.jks
 *.keystore
 
+# Signing properties
+keystore.properties
+
 # Google Services (e.g. APIs or Firebase)
 google-services.json
 

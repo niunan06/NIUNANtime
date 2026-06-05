@@ -12,7 +12,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         app:title="统计"
-        app:titleTextColor="@android:color/white"
+        app:titleTextColor="?attr/colorOnPrimary"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:navigationContentDescription="返回"
         app:layout_constraintTop_toTopOf="parent"
@@ -42,7 +42,7 @@
                 android:text="总时长：0秒"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="#6A4FB3"
+                android:textColor="?attr/colorPrimary"
                 android:layout_marginBottom="20dp" />
 
             <LinearLayout
