@@ -22,15 +22,17 @@ import com.example.niunantime.db.TimeEvent;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 
 public class TimerFragment extends Fragment {
 
     private FragmentTimerBinding binding;
-    private List<TimeEvent> currentEvents;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -91,7 +93,6 @@ public class TimerFragment extends Fragment {
 
     private void displayEvents(List<TimeEvent> events) {
         binding.eventListContainer.removeAllViews();
-        currentEvents = events;
 
         if (events == null || events.isEmpty()) {
             binding.tvEmpty.setVisibility(View.VISIBLE);
@@ -100,8 +101,29 @@ public class TimerFragment extends Fragment {
 
         binding.tvEmpty.setVisibility(View.GONE);
 
-        for (int i = 0; i < events.size(); i++) {
-            TimeEvent event = events.get(i);
+        // 按名称分组：总时长、最近一次时间戳
+        Map<String, long[]> grouped = new HashMap<>();
+        for (TimeEvent e : events) {
+            long[] data = grouped.get(e.eventName);
+            if (data == null) {
+                grouped.put(e.eventName, new long[]{e.durationSeconds, e.timestamp});
+            } else {
+                data[0] += e.durationSeconds;
+                if (e.timestamp > data[1]) data[1] = e.timestamp;
+            }
+        }
+
+        // 按总时长降序排列
+        List<Map.Entry<String, long[]>> sorted = new ArrayList<>(grouped.entrySet());
+        sorted.sort((a, b) -> Long.compare(b.getValue()[0], a.getValue()[0]));
+
+        SimpleDateFormat timeFmt = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+        for (Map.Entry<String, long[]> entry : sorted) {
+            String eventName = entry.getKey();
+            long totalDuration = entry.getValue()[0];
+            long lastTimestamp = entry.getValue()[1];
+
             View itemView = LayoutInflater.from(getContext())
                     .inflate(R.layout.item_event, binding.eventListContainer, false);
 
@@ -109,24 +131,21 @@ public class TimerFragment extends Fragment {
             TextView tvDuration = itemView.findViewById(R.id.tv_event_duration);
             TextView tvLastTime = itemView.findViewById(R.id.tv_last_time);
 
-            tvName.setText(event.eventName);
-            tvDuration.setText(formatDuration(event.durationSeconds));
-
-            // 显示"上次进行: HH:mm"
-            SimpleDateFormat timeFmt = new SimpleDateFormat("HH:mm", Locale.getDefault());
-            tvLastTime.setText("上次进行: " + timeFmt.format(new Date(event.timestamp)));
+            tvName.setText(eventName);
+            tvDuration.setText(formatDuration(totalDuration));
+            tvLastTime.setText("上次进行: " + timeFmt.format(new Date(lastTimestamp)));
 
             // 点击继续此事件
             itemView.setOnClickListener(v -> {
                 if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).showContinueEventDialog(event.id, event.eventName);
+                    ((MainActivity) getActivity()).showContinueEventDialog(0, eventName);
                 }
             });
 
-            // 长按删除
-            final int index = i;
+            // 长按删除今天该事件的所有记录
+            String nameForDelete = eventName;
             itemView.setOnLongClickListener(v -> {
-                showDeleteDialog(event, index);
+                showDeleteDialog(nameForDelete);
                 return true;
             });
 
@@ -134,13 +153,19 @@ public class TimerFragment extends Fragment {
         }
     }
 
-    private void showDeleteDialog(TimeEvent event, int index) {
+    private void showDeleteDialog(String eventName) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("删除事件")
-                .setMessage("确定要删除「" + event.eventName + "」吗？")
+                .setMessage("确定要删除今天所有「" + eventName + "」记录吗？")
                 .setPositiveButton("确定", (d, w) -> {
                     Executors.newSingleThreadExecutor().execute(() -> {
-                        AppDatabase.getInstance(requireContext()).timeEventDao().delete(event);
+                        Calendar cal = Calendar.getInstance();
+                        cal.set(Calendar.HOUR_OF_DAY, 0);
+                        cal.set(Calendar.MINUTE, 0);
+                        cal.set(Calendar.SECOND, 0);
+                        cal.set(Calendar.MILLISECOND, 0);
+                        AppDatabase.getInstance(requireContext())
+                                .timeEventDao().deleteByNameSince(eventName, cal.getTimeInMillis());
                         requireActivity().runOnUiThread(() -> loadEvents());
                     });
                 })

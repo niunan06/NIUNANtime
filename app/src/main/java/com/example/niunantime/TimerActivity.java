@@ -216,21 +216,12 @@ public class TimerActivity extends AppCompatActivity {
         long endTime = startTime + durationSeconds * 1000L;
 
         Executors.newSingleThreadExecutor().execute(() -> {
-            AppDatabase db = AppDatabase.getInstance(this);
-            TimeEvent existing = db.timeEventDao().getByName(eventName);
-
-            if (existing != null) {
-                existing.durationSeconds += durationSeconds;
-                existing.timestamp = endTime;
-                db.timeEventDao().update(existing);
-            } else {
-                TimeEvent event = new TimeEvent();
-                event.eventName = eventName;
-                event.durationSeconds = durationSeconds;
-                event.type = timerType;
-                event.timestamp = endTime;
-                db.timeEventDao().insert(event);
-            }
+            TimeEvent event = new TimeEvent();
+            event.eventName = eventName;
+            event.durationSeconds = durationSeconds;
+            event.type = timerType;
+            event.timestamp = endTime;
+            AppDatabase.getInstance(this).timeEventDao().insert(event);
         });
     }
 

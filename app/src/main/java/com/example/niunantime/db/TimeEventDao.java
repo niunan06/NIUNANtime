@@ -31,6 +31,9 @@ public interface TimeEventDao {
     @Query("SELECT * FROM time_events WHERE eventName = :name ORDER BY timestamp DESC LIMIT 1")
     TimeEvent getByName(String name);
 
+    @Query("DELETE FROM time_events WHERE eventName = :name AND timestamp >= :startTime")
+    void deleteByNameSince(String name, long startTime);
+
     @Update
     void update(TimeEvent event);
 
