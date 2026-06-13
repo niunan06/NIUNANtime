@@ -42,7 +42,7 @@
                 android:text="总时长：0秒"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="?attr/colorPrimary"
+                android:textColor="?android:attr/textColorPrimary"
                 android:layout_marginBottom="20dp" />
 
             <LinearLayout

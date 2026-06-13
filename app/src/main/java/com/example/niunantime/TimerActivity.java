@@ -1,13 +1,15 @@
 package com.example.niunantime;
 
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.content.SharedPreferences;
-import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
 import com.example.niunantime.databinding.ActivityTimerBinding;
 import com.example.niunantime.db.AppDatabase;
@@ -24,6 +26,7 @@ public class TimerActivity extends AppCompatActivity {
     public static final String EXTRA_IS_RESUME = "is_resume";
     public static final String EXTRA_START_TIME = "start_time";
     public static final String EXTRA_REMAINING_SECONDS = "remaining_seconds";
+    public static final String EXTRA_BG_ELAPSED = "bg_elapsed";
     public static final String EXTRA_EVENT_ID = "event_id";
 
     private ActivityTimerBinding binding;
@@ -54,7 +57,7 @@ public class TimerActivity extends AppCompatActivity {
 
         binding.tvEventName.setText(eventName);
 
-        binding.toolbar.setNavigationOnClickListener(v -> showBackDialog());
+        binding.toolbar.setNavigationOnClickListener(v -> saveToTimerManagerAndFinish());
 
         if ("countdown".equals(timerType)) {
             binding.toolbar.setTitle("定时");
@@ -62,15 +65,26 @@ public class TimerActivity extends AppCompatActivity {
             if (isResume) {
                 startTime = getIntent().getLongExtra(EXTRA_START_TIME, System.currentTimeMillis());
                 remainingSeconds = getIntent().getIntExtra(EXTRA_REMAINING_SECONDS, 0);
+                // 后台已走完，直接结算
+                if (remainingSeconds <= 0) {
+                    onCountdownFinished();
+                    return;
+                }
             } else {
                 startTime = System.currentTimeMillis();
                 totalSeconds = durationMinutes * 60;
                 remainingSeconds = totalSeconds;
             }
 
-            // 暂停/继续按钮（红色）
-            binding.btnStop.setText("暂停");
-            binding.btnStop.setOnClickListener(v -> toggleCountdownPause());
+            // 暂停/继续按钮
+            binding.btnPause.setOnClickListener(v -> toggleCountdownPause());
+            // 结束按钮
+            binding.btnEnd.setOnClickListener(v -> {
+                TimerManager.getInstance().stop();
+                int elapsedActual = countdownInitialSeconds - remainingSeconds;
+                saveEvent(elapsedActual > 0 ? elapsedActual : 0);
+                finish();
+            });
             startCountdown();
         } else {
             binding.toolbar.setTitle("计时");
@@ -81,57 +95,60 @@ public class TimerActivity extends AppCompatActivity {
                 startTime = System.currentTimeMillis();
             }
 
-            binding.btnStop.setOnClickListener(v -> stopStopwatch());
+            binding.btnPause.setOnClickListener(v -> toggleStopwatchPause());
+            binding.btnEnd.setOnClickListener(v -> stopStopwatch());
             startStopwatch();
         }
     }
 
-    private void showBackDialog() {
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("计时进行中")
-                .setMessage("返回继续后台计时，退出将不记录本次计时")
-                .setPositiveButton("返回", (d, w) -> {
-                    isRunning = false;
-                    handler.removeCallbacks(timerRunnable);
+    private void saveToTimerManagerAndFinish() {
+        isRunning = false;
+        handler.removeCallbacks(timerRunnable);
 
-                    if ("stopwatch".equals(timerType)) {
-                        long elapsed = System.currentTimeMillis() - startTime;
-                        TimerManager.getInstance().pauseStopwatch(eventName, elapsed);
-                    } else {
-                        TimerManager.getInstance().pauseCountdown(eventName, remainingSeconds);
-                    }
-                    finish();
-                })
-                .setNegativeButton("退出", (d, w) -> {
-                    TimerManager.getInstance().stop();
-                    isRunning = false;
-                    handler.removeCallbacks(timerRunnable);
-                    finish();
-                })
-                .create();
-
-        dialog.setOnShowListener(d -> {
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.RED);
-        });
-
-        dialog.show();
+        if ("stopwatch".equals(timerType)) {
+            long elapsed = System.currentTimeMillis() - startTime;
+            TimerManager.getInstance().pauseStopwatch(eventName, elapsed);
+        } else {
+            TimerManager.getInstance().pauseCountdown(eventName, remainingSeconds);
+        }
+        finish();
     }
 
-    // ---- 暂停/继续（仅倒计时） ----
+    // ---- 暂停/继续（计时 & 倒计时通用） ----
+
+    private long pauseElapsed; // 秒表暂停时累积的毫秒数
+
+    private void toggleStopwatchPause() {
+        if (isPaused) {
+            // 继续
+            isPaused = false;
+            isRunning = true;
+            startTime = System.currentTimeMillis() - pauseElapsed;
+            binding.btnPause.setText("暂停");
+            startStopwatch();
+        } else {
+            // 暂停
+            isPaused = true;
+            isRunning = false;
+            handler.removeCallbacks(timerRunnable);
+            pauseElapsed = System.currentTimeMillis() - startTime;
+            binding.btnPause.setText("继续");
+        }
+    }
 
     private void toggleCountdownPause() {
         if (isPaused) {
             // 继续
             isPaused = false;
             isRunning = true;
-            binding.btnStop.setText("暂停");
+            binding.btnPause.setText("暂停");
             startCountdown();
         } else {
             // 暂停
             isPaused = true;
             isRunning = false;
             handler.removeCallbacks(timerRunnable);
-            binding.btnStop.setText("继续");
+            binding.btnPause.setText("继续");
         }
     }
 
@@ -202,6 +219,18 @@ public class TimerActivity extends AppCompatActivity {
         TimerManager.getInstance().stop();
         saveEvent(countdownInitialSeconds);
 
+        // 发送通知
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (nm != null) {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "todo_reminder")
+                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                    .setContentTitle("时间到！")
+                    .setContentText(eventName + " 事件时间到！！")
+                    .setAutoCancel(true)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH);
+            nm.notify(1001, builder.build());
+        }
+
         new AlertDialog.Builder(this)
                 .setTitle("时间到！")
                 .setMessage("事件「" + eventName + "」已完成")
@@ -227,7 +256,7 @@ public class TimerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        showBackDialog();
+        saveToTimerManagerAndFinish();
     }
 
     @Override
@@ -255,6 +284,8 @@ public class TimerActivity extends AppCompatActivity {
             case "brown": setTheme(R.style.Theme_NIUNANtime_Brown); break;
             case "blue_grey": setTheme(R.style.Theme_NIUNANtime_BlueGrey); break;
             case "light_green": setTheme(R.style.Theme_NIUNANtime_LightGreen); break;
+            case "white": setTheme(R.style.Theme_NIUNANtime_White); break;
+            case "black": setTheme(R.style.Theme_NIUNANtime_Black); break;
         }
     }
 }

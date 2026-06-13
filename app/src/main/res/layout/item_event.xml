@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:text="00:00"
             android:textSize="16sp"
-            android:textColor="?attr/colorPrimary"
+            android:textColor="?android:attr/textColorPrimary"
             android:textStyle="bold" />
 
     </LinearLayout>

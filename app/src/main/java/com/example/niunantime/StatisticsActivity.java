@@ -84,12 +84,14 @@ public class StatisticsActivity extends AppCompatActivity {
                 cal.set(Calendar.SECOND, 0);
                 cal.set(Calendar.MILLISECOND, 0);
             } else {
-                cal.setFirstDayOfWeek(Calendar.MONDAY);
-                cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
                 cal.set(Calendar.HOUR_OF_DAY, 0);
                 cal.set(Calendar.MINUTE, 0);
                 cal.set(Calendar.SECOND, 0);
                 cal.set(Calendar.MILLISECOND, 0);
+                // 从今天往前推到最近的周一，避免跨周bug
+                int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+                int daysFromMonday = (dayOfWeek == Calendar.SUNDAY) ? 6 : dayOfWeek - Calendar.MONDAY;
+                cal.add(Calendar.DAY_OF_MONTH, -daysFromMonday);
             }
             periodStartTime = cal.getTimeInMillis();
 

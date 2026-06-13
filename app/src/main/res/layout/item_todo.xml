@@ -44,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="设置提醒"
-            android:textColor="?attr/colorPrimary"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="13sp"
             android:background="@android:color/transparent"
             android:clickable="true"

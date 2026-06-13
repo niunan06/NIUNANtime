@@ -50,9 +50,17 @@
             android:textColor="#FFFFFF"
             android:backgroundTint="#E53935"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@id/fab_add"
+            app:layout_constraintBottom_toTopOf="@id/ongoing_barrier"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="8dp" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/ongoing_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="top"
+            app:barrierAllowsGoneWidgets="false"
+            app:constraint_referenced_ids="fab_add,todo_buttons" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_add"

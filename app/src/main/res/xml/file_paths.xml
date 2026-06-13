@@ -3,4 +3,7 @@
     <files-path
         name="bg_images"
         path="bg/" />
+    <cache-path
+        name="crop_cache"
+        path="crop/" />
 </paths>

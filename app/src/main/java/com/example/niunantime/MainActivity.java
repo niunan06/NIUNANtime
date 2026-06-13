@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 
@@ -34,6 +35,9 @@ import com.yalantis.ucrop.UCrop;
 
 import java.util.concurrent.Executors;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -171,11 +175,7 @@ public class MainActivity extends AppCompatActivity {
         // FAB点击 —— 添加事件（有进行中计时时禁止）
         binding.fabAdd.setOnClickListener(v -> {
             if (TimerManager.getInstance().isActive()) {
-                new AlertDialog.Builder(this)
-                        .setTitle("提示")
-                        .setMessage("有一个事件正在进行中，请先完成后再添加新事件")
-                        .setPositiveButton("确定", null)
-                        .show();
+                showOngoingWarning();
             } else {
                 showAddEventDialog();
             }
@@ -313,7 +313,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showContinueEventDialog(int eventId, String eventName) {
+        if (TimerManager.getInstance().isActive()) {
+            showOngoingWarning();
+            return;
+        }
         showTimerDialog(eventId, eventName, "继续进行此事件");
+    }
+
+    private void showOngoingWarning() {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("提示")
+                .setMessage("有一个事件正在进行中，请先完成后再添加新事件")
+                .setPositiveButton("确定", null)
+                .create();
+        dialog.show();
+        styleDialogButtons(dialog);
     }
 
     private void showTimerDialog(int existingEventId, String existingName, String title) {
@@ -379,6 +393,16 @@ public class MainActivity extends AppCompatActivity {
 
         dialog.setButton(AlertDialog.BUTTON_POSITIVE, "确定", (d, w) -> {});
         dialog.show();
+        styleDialogButtons(dialog);
+    }
+
+    private void styleDialogButtons(AlertDialog dialog) {
+        String theme = getSharedPreferences("app_prefs", MODE_PRIVATE).getString("theme_color", "purple");
+        if ("white".equals(theme)) {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(0xFF333333);
+            Button negBtn = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            if (negBtn != null) negBtn.setTextColor(0xFF333333);
+        }
     }
 
     // ---- 添加待办 ----
@@ -388,7 +412,7 @@ public class MainActivity extends AppCompatActivity {
         input.setHint("请输入待办名称");
         input.setPadding(48, 24, 48, 24);
 
-        new AlertDialog.Builder(this)
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("添加待办")
                 .setView(input)
                 .setPositiveButton("确定", (d, w) -> {
@@ -410,7 +434,9 @@ public class MainActivity extends AppCompatActivity {
                     });
                 })
                 .setNegativeButton("取消", null)
-                .show();
+                .create();
+        dialog.show();
+        styleDialogButtons(dialog);
     }
 
     // ---- 主题切换 ----
@@ -472,6 +498,21 @@ public class MainActivity extends AppCompatActivity {
 
     private void startCrop(Uri sourceUri) {
         try {
+            // 先复制到缓存文件，避免 content:// URI 权限问题导致 uCrop 无法读取
+            File cacheDir = new File(getCacheDir(), "crop");
+            if (!cacheDir.exists()) cacheDir.mkdirs();
+            File tempSrc = new File(cacheDir, "source_" + System.currentTimeMillis() + ".jpg");
+            try (InputStream in = getContentResolver().openInputStream(sourceUri);
+                 OutputStream out = new FileOutputStream(tempSrc)) {
+                byte[] buf = new byte[8192];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+            }
+            Uri tempUri = FileProvider.getUriForFile(this,
+                    getPackageName() + ".fileprovider", tempSrc);
+
             String filename = "bg_" + pendingBgTarget + ".jpg";
             File outputFile = new File(getFilesDir(), "bg/" + filename);
             File bgDir = outputFile.getParentFile();
@@ -480,7 +521,13 @@ public class MainActivity extends AppCompatActivity {
             Uri destinationUri = FileProvider.getUriForFile(this,
                     getPackageName() + ".fileprovider", outputFile);
 
-            UCrop uCrop = UCrop.of(sourceUri, destinationUri);
+            UCrop uCrop = UCrop.of(tempUri, destinationUri);
+            UCrop.Options options = new UCrop.Options();
+            options.setFreeStyleCropEnabled(true);
+            options.setShowCropGrid(true);
+            options.setShowCropFrame(true);
+            options.setHideBottomControls(false);
+            uCrop.withOptions(options);
 
             Intent cropIntent = uCrop.getIntent(this);
             cropLauncher.launch(cropIntent);
