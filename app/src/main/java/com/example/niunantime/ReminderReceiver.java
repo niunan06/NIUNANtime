@@ -27,7 +27,7 @@ public class ReminderReceiver extends BroadcastReceiver {
 
         if (todoName == null) return;
 
-        createNotificationChannel(context);
+        ensureChannel(context);
 
         Intent launchIntent = new Intent(context, MainActivity.class);
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -61,18 +61,13 @@ public class ReminderReceiver extends BroadcastReceiver {
         });
     }
 
-    private void createNotificationChannel(Context context) {
+    public static void ensureChannel(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "待办提醒",
-                    NotificationManager.IMPORTANCE_DEFAULT
-            );
-            channel.setDescription("待办事项提醒通知");
             NotificationManager manager =
-                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                    context.getSystemService(NotificationManager.class);
             if (manager != null) {
-                manager.createNotificationChannel(channel);
+                manager.createNotificationChannel(new NotificationChannel(
+                        CHANNEL_ID, "待办提醒", NotificationManager.IMPORTANCE_DEFAULT));
             }
         }
     }

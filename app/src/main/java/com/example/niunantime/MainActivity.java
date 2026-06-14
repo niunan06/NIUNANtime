@@ -39,8 +39,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
@@ -110,8 +108,9 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = binding.drawerLayout;
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            Insets statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            Insets navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+            v.setPadding(statusBars.left, statusBars.top, statusBars.right, navBars.bottom);
             return insets;
         });
         setSupportActionBar(binding.toolbar);
@@ -442,26 +441,7 @@ public class MainActivity extends AppCompatActivity {
     // ---- 主题切换 ----
 
     private void applyTheme() {
-        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
-        String themeColor = prefs.getString("theme_color", "purple");
-        switch (themeColor) {
-            case "blue": setTheme(R.style.Theme_NIUNANtime_Blue); break;
-            case "green": setTheme(R.style.Theme_NIUNANtime_Green); break;
-            case "red": setTheme(R.style.Theme_NIUNANtime_Red); break;
-            case "orange": setTheme(R.style.Theme_NIUNANtime_Orange); break;
-            case "teal": setTheme(R.style.Theme_NIUNANtime_Teal); break;
-            case "pink": setTheme(R.style.Theme_NIUNANtime_Pink); break;
-            case "indigo": setTheme(R.style.Theme_NIUNANtime_Indigo); break;
-            case "cyan": setTheme(R.style.Theme_NIUNANtime_Cyan); break;
-            case "lime": setTheme(R.style.Theme_NIUNANtime_Lime); break;
-            case "deep_orange": setTheme(R.style.Theme_NIUNANtime_DeepOrange); break;
-            case "deep_purple": setTheme(R.style.Theme_NIUNANtime_DeepPurple); break;
-            case "brown": setTheme(R.style.Theme_NIUNANtime_Brown); break;
-            case "blue_grey": setTheme(R.style.Theme_NIUNANtime_BlueGrey); break;
-            case "light_green": setTheme(R.style.Theme_NIUNANtime_LightGreen); break;
-            case "white": setTheme(R.style.Theme_NIUNANtime_White); break;
-            case "black": setTheme(R.style.Theme_NIUNANtime_Black); break;
-        }
+        ThemeUtil.applyTheme(this);
     }
 
     private void restoreNavUI() {
@@ -577,18 +557,7 @@ public class MainActivity extends AppCompatActivity {
     // ---- 通知 ----
 
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    "todo_reminder",
-                    "待办提醒",
-                    NotificationManager.IMPORTANCE_DEFAULT
-            );
-            channel.setDescription("待办事项提醒通知");
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            if (manager != null) {
-                manager.createNotificationChannel(channel);
-            }
-        }
+        ReminderReceiver.ensureChannel(this);
     }
 
     private void requestNotificationPermission() {

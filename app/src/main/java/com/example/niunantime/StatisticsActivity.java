@@ -40,8 +40,9 @@ public class StatisticsActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            Insets statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            Insets navBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+            v.setPadding(statusBars.left, statusBars.top, statusBars.right, navBars.bottom);
             return insets;
         });
 
@@ -195,26 +196,7 @@ public class StatisticsActivity extends AppCompatActivity {
     }
 
     private void applyTheme() {
-        SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
-        String themeColor = prefs.getString("theme_color", "purple");
-        switch (themeColor) {
-            case "blue": setTheme(R.style.Theme_NIUNANtime_Blue); break;
-            case "green": setTheme(R.style.Theme_NIUNANtime_Green); break;
-            case "red": setTheme(R.style.Theme_NIUNANtime_Red); break;
-            case "orange": setTheme(R.style.Theme_NIUNANtime_Orange); break;
-            case "teal": setTheme(R.style.Theme_NIUNANtime_Teal); break;
-            case "pink": setTheme(R.style.Theme_NIUNANtime_Pink); break;
-            case "indigo": setTheme(R.style.Theme_NIUNANtime_Indigo); break;
-            case "cyan": setTheme(R.style.Theme_NIUNANtime_Cyan); break;
-            case "lime": setTheme(R.style.Theme_NIUNANtime_Lime); break;
-            case "deep_orange": setTheme(R.style.Theme_NIUNANtime_DeepOrange); break;
-            case "deep_purple": setTheme(R.style.Theme_NIUNANtime_DeepPurple); break;
-            case "brown": setTheme(R.style.Theme_NIUNANtime_Brown); break;
-            case "blue_grey": setTheme(R.style.Theme_NIUNANtime_BlueGrey); break;
-            case "light_green": setTheme(R.style.Theme_NIUNANtime_LightGreen); break;
-            case "white": setTheme(R.style.Theme_NIUNANtime_White); break;
-            case "black": setTheme(R.style.Theme_NIUNANtime_Black); break;
-        }
+        ThemeUtil.applyTheme(this);
     }
 
     private String formatDuration(long totalSeconds) {
